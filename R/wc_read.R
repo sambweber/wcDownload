@@ -10,7 +10,7 @@
 wc_read_fastGPS = function(file=NULL,directory) {
   
   if(is.null(file)){
-  file = list.files(directory,pattern = "\\-[0-9]-FastGPS.csv",full.names = T)
+  file = list.files(directory,pattern = "\\-[0-9]-FastGPS.csv",full.names = T) %>% fs::path_wd
   }
   
   read.csv(file) %>%
@@ -33,7 +33,7 @@ wc_read_fastGPS = function(file=NULL,directory) {
 wc_read_locs = function(file=NULL,directory) {
   
   if(is.null(file)){
-  file = list.files(directory,pattern = "\\-[0-9]-Locations.csv",full.names = T)
+  file = list.files(directory,pattern = "\\-[0-9]-Locations.csv",full.names = T) %>% fs::path_wd
   }
   
   read.csv(file) %>%
