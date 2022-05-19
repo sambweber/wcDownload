@@ -21,7 +21,6 @@ wc_read_fastGPS = function(file=NULL,directory) {
   
 }  
 
-
 # ------------------------------------------------------------------------------------------------------------
 # wc_read_locs
 # ------------------------------------------------------------------------------------------------------------
@@ -42,3 +41,41 @@ wc_read_locs = function(file=NULL,directory) {
   st_as_sf(coords = c('Longitude','Latitude'),crs=4326)
   
 }  
+
+# ------------------------------------------------------------------------------------------
+# wc_read_DDN
+# ------------------------------------------------------------------------------------------
+
+wc_read_DDN = function(directory) {
+
+  f = list.files(directory,pattern = "\\DDN.csv",full.names = T)
+  
+  if(length(f)){
+   read.csv(f) %>% tibble() %>% mutate(Date = as.POSIXct(Date,format = '%H:%M:%S %d-%b-%Y',tz='GMT'))
+  } else stop('Cannot find DDN.csv file in the directory provided')
+
+}
+
+# ------------------------------------------------------------------------------------------
+# wc_haulouts
+# ------------------------------------------------------------------------------------------
+
+wc_haulouts = function(directory, event.gap){
+
+   ddn = wc_read_DDN(directory) %>% subset(Disposition == 'dry',select='Date')
+   gps = wc_read_fastGPS(directory=directory) %>% subset(Hauled.Out == 1,select='Date')
+  
+   haulouts = 
+      mutate(gps,GPS=TRUE,dry=floor_date(Date,unit = 'hours') %in% ddn$Date) %>% bind_rows(
+      subset(ddn,!Date %in% floor_date(gps$Date,unit = 'hours')) %>% mutate(dry=TRUE,GPS=FALSE)
+      ) %>% arrange(Date)
+  
+  if(!missing(event.gap)){
+  haulouts = mutate(haulouts,lag = Date - lag(Date)) %>%
+             mutate(event = cumsum(lag > duration(event.gap) | is.na(lag))) %>%
+             dplyr::select(-lag)
+  }
+  
+  return(haulouts)
+  
+}
