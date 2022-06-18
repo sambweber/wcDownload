@@ -59,8 +59,9 @@ wc_read_DDN = function(directory) {
 # ------------------------------------------------------------------------------------------
 # wc_haulouts
 # ------------------------------------------------------------------------------------------
+devtools::source_url("https://github.com/sambweber/track_tools/blob/main/R/daynight.R?raw=TRUE")
 
-wc_haulouts = function(directory, event.gap){
+wc_haulouts = function(directory, event.gap, daynight = T){
 
    ddn = wc_read_DDN(directory) %>% subset(Disposition == 'dry',select='Date')
    gps = wc_read_fastGPS(directory=directory) %>% subset(Hauled.Out == 1,select='Date')
@@ -75,6 +76,12 @@ wc_haulouts = function(directory, event.gap){
              mutate(event = cumsum(lag > duration(event.gap) | is.na(lag))) %>%
              dplyr::select(-lag)
   }
+  
+  if(daynight){
+     empty = st_is_empty(haulouts) # Replace empty geoms from DDN with centroids of gps haulouts
+     st_geometry(haulouts[empty,]) <- rep(st_centroid(st_combine(haulouts[!empty,])),sum(empty))
+     haulouts = daynight(haulouts,'Date')
+   }
   
   return(haulouts)
   
