@@ -14,7 +14,7 @@ wc_read_fastGPS = function(file=NULL,directory) {
   }
   
   read.csv(file) %>%
-  mutate(Date = parse_date_time(paste(Time,Day), c("HMS dbY", "HMOS dbY"),tz='GMT')) %>%
+  mutate(Date = parse_date_time(paste(Time,Day), c("HMS dbY", "HMOS dbY", "HMS dby", "HMOS dby"),tz='GMT')) %>%
   subset(!is.na(Longitude)&!is.na(Latitude)) %>%
   arrange(Date) %>%
   st_as_sf(coords = c('Longitude','Latitude'),crs=4326)
