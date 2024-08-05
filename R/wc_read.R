@@ -53,7 +53,7 @@ wc_read_all = function(directory) {
   
   gps_file = wc_read_fastGPS(directory = directory) %>%
              mutate(Type = 'FastGPS',Ptt = unique(locs_file$Ptt),Instr = unique(locs_file$Instr)) %>%
-             dplyr::select(DeployID = Name, Type, Quality = Satellites, Latitude, Longitude)
+             dplyr::select(DeployID = Name, Ptt, Instr, Type, Quality = Satellites)
   
   bind_rows(locs_file,gps_file) %>%
   arrange(Date)
