@@ -7,7 +7,7 @@
 # -------------------------------------------------------------------------------------------------------------
 
 
-wc_read_fastGPS = function(file=NULL,directory) {
+wc_read_fastGPS = function(file=NULL,directory,max.residual = 35) {
   
   if(is.null(file)){
   file = list.files(directory,pattern = "\\-[0-9]-FastGPS.csv",full.names = T) 
@@ -15,7 +15,7 @@ wc_read_fastGPS = function(file=NULL,directory) {
   
   read.csv(file) %>%
   mutate(Date = parse_date_time(paste(Time,Day), c("HMS dbY", "HMOS dbY", "HMS dby", "HMOS dby"),tz='GMT')) %>%
-  subset(!is.na(Longitude)&!is.na(Latitude)) %>%
+  subset(!is.na(Longitude)&!is.na(Latitude)&Residual<max.residual) %>%
   arrange(Date) %>%
   st_as_sf(coords = c('Longitude','Latitude'),crs=4326)
   
@@ -39,6 +39,23 @@ wc_read_locs = function(file=NULL,directory) {
   mutate(Date = parse_date_time(Date, c("HMS dbY", "HMOS dbY"),tz='GMT')) %>%
   arrange(Date) %>%
   st_as_sf(coords = c('Longitude','Latitude'),crs=4326)
+  
+}  
+
+# ------------------------------------------------------------------------------------------------------------
+# wc_read_all
+# -------------------------------------------------------------------------------------------------------------
+
+wc_read_all = function(directory) {
+  
+  locs_file = wc_read_locs(directory)
+  
+  gps_file = wc_read_fastGPS(directory) %>%
+             mutate(Type = 'FastGPS',Ptt = unique(locs_file$Ptt),Instr = unique(locs_file$Instr)) %>%
+             dplyr::select(DeployID = Name, Type, Quality = Satellites, Latitude, Longitude)
+  
+  bind_rows(locs_file,gps_file) %>%
+  arrange(Date)
   
 }  
 
