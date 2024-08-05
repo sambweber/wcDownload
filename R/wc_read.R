@@ -48,7 +48,8 @@ wc_read_locs = function(file=NULL,directory) {
 
 wc_read_all = function(directory) {
   
-  locs_file = wc_read_locs(directory)
+  locs_file = wc_read_locs(directory) %>%
+              subset(type!='FastGPS')
   
   gps_file = wc_read_fastGPS(directory) %>%
              mutate(Type = 'FastGPS',Ptt = unique(locs_file$Ptt),Instr = unique(locs_file$Instr)) %>%
