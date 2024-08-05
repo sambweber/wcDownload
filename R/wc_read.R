@@ -32,7 +32,7 @@ wc_read_fastGPS = function(file=NULL,directory,max.residual = 35) {
 wc_read_locs = function(file=NULL,directory) {
   
   if(is.null(file)){
-  file = list.files(directory,pattern = "\\-[0-9]-Locations.csv",full.names = T)
+  file = list.files(directory,pattern = "\\-Locations.csv",full.names = T)
   }
   
   read.csv(file) %>%
@@ -48,10 +48,10 @@ wc_read_locs = function(file=NULL,directory) {
 
 wc_read_all = function(directory) {
   
-  locs_file = wc_read_locs(directory) %>%
+  locs_file = wc_read_locs(directory = directory) %>%
               subset(type!='FastGPS')
   
-  gps_file = wc_read_fastGPS(directory) %>%
+  gps_file = wc_read_fastGPS(directory = directory) %>%
              mutate(Type = 'FastGPS',Ptt = unique(locs_file$Ptt),Instr = unique(locs_file$Instr)) %>%
              dplyr::select(DeployID = Name, Type, Quality = Satellites, Latitude, Longitude)
   
