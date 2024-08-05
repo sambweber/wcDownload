@@ -52,8 +52,8 @@ wc_read_all = function(directory) {
               subset(Type!='FastGPS')
   
   gps_file = wc_read_fastGPS(directory = directory) %>%
-             mutate(Type = 'FastGPS',Ptt = unique(locs_file$Ptt),Instr = unique(locs_file$Instr)) %>%
-             dplyr::select(DeployID = Name, Ptt, Instr, Type, Quality = Satellites)
+             mutate(Type = 'FastGPS',Ptt = unique(locs_file$Ptt),Instr = unique(locs_file$Instr),Satellites = as.character(Satellites)) %>%
+             dplyr::select(DeployID = Name, Ptt, Instr, Date, Type, Quality = Satellites)
   
   bind_rows(locs_file,gps_file) %>%
   arrange(Date)
